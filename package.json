@@ -1,0 +1,30 @@
+{
+  "name": "railway-map-renderer",
+  "version": "0.1.0",
+  "description": "Renders railway maps based on data from The Shire (Minecraft Server)",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "npx jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/TheShireMinecraft/railway-map-renderer.git"
+  },
+  "author": "Malaclord",
+  "license": "UNLICENSED",
+  "bugs": {
+    "url": "https://github.com/TheShireMinecraft/railway-map-renderer/issues"
+  },
+  "homepage": "https://github.com/TheShireMinecraft/railway-map-renderer#readme",
+  "devDependencies": {
+    "typescript": "5.3.3"
+  },
+  "dependencies": {
+    "axios": "^1.6.5"
+  },
+  "files": [
+    "/dist"
+  ]
+}

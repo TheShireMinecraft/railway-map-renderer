@@ -52,6 +52,8 @@ class RailwayMapRenderer {
         function zoom(by: number) {
             view.scale -= by * view.scale;
 
+            view.scale = Math.min(Math.max(renderer.config.minScale,view.scale),renderer.config.maxScale);
+
             renderer.draw();
         }
 
@@ -634,6 +636,9 @@ class RailwayMapRendererConfig {
     stationGroupsOffset: number = 12;
     renderDebug: boolean = false;
     showStationsWithNoConnections: boolean = true;
+
+    minScale: number = 0.05;
+    maxScale: number = 20;
     
     scrollSensitivity: number = .001;
 }

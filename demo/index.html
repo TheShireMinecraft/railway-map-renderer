@@ -37,7 +37,7 @@
 			}
 
 			window.addEventListener("resize", (ev) => {
-				resizeCanvas()
+				resizeCanvas();
 			});
 
 			railwayMapRenderer.onConnectionClicked = (ev) => {
@@ -51,7 +51,9 @@
 					groupNames.push(g.name);
 				})
 
-				console.log(`Clicked station: ${ev.name} (${groupNames.join(', ')})`);
+				const groupsString = groupNames.length > 0 ? `(${groupNames.join(', ')})` : "(No connections!)";
+
+				console.log(`Clicked station: ${ev.name} ${groupsString}`);
 			}
 		</script>
 	</body>

@@ -130,8 +130,8 @@ class RailwayMapRenderer {
                     ev.touches[0].clientY - ev.touches[1].clientY);
     
                 if (mouseState.touchDist) {
-                    const deltaDist = mouseState.touchDist-dist
-                    zoom(deltaDist)
+                    const deltaDist = mouseState.touchDist-dist;
+                    zoom(deltaDist*this.config.pinchSensitivity);
                 }; 
     
     
@@ -641,6 +641,7 @@ class RailwayMapRendererConfig {
     maxScale: number = 20;
     
     scrollSensitivity: number = .001;
+    pinchSensitivity: number = .0025;
 }
 
 // Expose classes globally 

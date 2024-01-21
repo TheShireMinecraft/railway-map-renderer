@@ -24,8 +24,13 @@
 
 			const stationsData    = (await axios.get("https://shirecraft.us/api/railway/stations"   )).data.data;
 			const connectionsData = (await axios.get("https://shirecraft.us/api/railway/connections")).data.data;
+			const journeyData     = (await axios.get("https://shirecraft.us/api/railway/route?start=KMG&end=LAC&weighting=time")).data.data.components;
+
+			console.log(journeyData);
 
 			railwayMapRenderer.setData(stationsData,connectionsData);
+
+			railwayMapRenderer.setRoute(journeyData);
 
 			resizeCanvas()
 

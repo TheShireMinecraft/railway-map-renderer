@@ -1,7 +1,9 @@
 class RailwayMapRenderer {
-    private stations:    Array<Station>    = [];
-    private connections: Array<Connection> = [];
-    private groups:      Array<Group>      = [];
+    private stations:      Array<Station>    = [];
+    private connections:   Array<Connection> = [];
+    private groups:        Array<Group>      = [];
+    private route:         Array<Connection> = [];
+    private routeStations: Array<Station>    = [];
 
     private canvas: HTMLCanvasElement;
     private ctx: CanvasRenderingContext2D | null;
@@ -192,6 +194,8 @@ class RailwayMapRenderer {
             y: y
         })};
     
+        if (this.routeStations.length > 0 && !this.routeStations.includes(station)) return;
+
         if (groups.length > 0) {
             this.drawText(x,y+(20/view.scale),this.config.fontSize,name,"#ffffff","center",true)
     
@@ -220,6 +224,9 @@ class RailwayMapRenderer {
 
         if (!ctx) return;
 
+        const dim = this.route.length > 0;
+
+
         ctx.beginPath();
         let curGroupId = connections[0].group.id;
     
@@ -232,13 +239,30 @@ class RailwayMapRenderer {
                     ctx.beginPath();
                 }
 
-                this.drawConnection(c)
+                this.drawConnection(c,dim);
+            }
+            );
+        ctx.stroke();
+
+        ctx.beginPath();
+        curGroupId = connections[0].group.id;
+    
+        if (dim) this.route.forEach(
+            c => {
+
+                if (c.group.id != curGroupId) {
+                    curGroupId = c.group.id;
+                    ctx.stroke();
+                    ctx.beginPath();
+                }
+
+                this.drawConnection(c);
             }
             );
         ctx.stroke();
     }
 
-    private drawConnection(connection: Connection) {
+    private drawConnection(connection: Connection, dim: boolean = false) {
         const ctx = this.ctx;
 
         if (!ctx) return;
@@ -277,7 +301,7 @@ class RailwayMapRenderer {
         x2 += offsetTo ;
         y2 -= offsetTo ;
 
-        ctx.strokeStyle = `#${color}`;
+        ctx.strokeStyle = dim ? `#${color}11` :`#${color}`;
         
         const clickConnection = () => {this.onConnectionClicked({
             from_name: from.name,
@@ -416,7 +440,31 @@ class RailwayMapRenderer {
         });
     }
 
+    /**
+     * Set route for journey planner display, from the api
+     * @param routeData - Array of route nodes
+     */
+    public setRoute(routeData: Array<IRouteConnection>) {
+        this.route = [];
+        this.routeStations = [];
 
+        routeData.forEach(rc => {
+            const connection = this.connections.filter(c=>{
+                return ((c.fromStation.label == rc.current_station.label && c.toStation.label == rc.next_station.label) ||
+                (c.toStation.label == rc.current_station.label && c.fromStation.label == rc.next_station.label)) &&
+                (c.line.id == rc.current_line.id || c.group.id == rc.current_line.id || c.group.name == rc.current_line.name);
+            })[0];
+
+            if (connection ) {
+                if (!this.route.includes(connection)) this.route.push(connection);
+                const fromStation = connection.fromStation;
+                const toStation = connection.toStation;
+                if (!this.routeStations.includes(fromStation)) this.routeStations.push(fromStation);
+                if (!this.routeStations.includes(toStation)) this.routeStations.push(toStation);
+            }  
+
+        })
+    }
 
     /**
      * Set data loaded from api
@@ -450,6 +498,8 @@ class RailwayMapRenderer {
                 s => s.label == cd.to_station_label
             )[0];
 
+            const lineId = cd.line_id;
+
             let group: Group;
 
             // Load group 
@@ -469,6 +519,21 @@ class RailwayMapRenderer {
                 this.groups.push(group);
             }
 
+            let line;
+
+            if (!group.lines.some(l => l.id == lineId)) {
+                line = new Line(
+                    lineId,
+                    group
+                )
+
+                group.lines.push(line)
+            } else {
+                line = group.lines.filter(l => l.id == lineId)[0];
+            }
+
+
+
             if (!fromStation.groups.some(g => g.id == group.id)) fromStation.groups.push(group);
             if (!toStation.groups.some(g => g.id == group.id)) toStation.groups.push(group);
 
@@ -479,7 +544,7 @@ class RailwayMapRenderer {
             if (otherWay) 
                 otherWay.twoWay = true;
             else 
-                this.connections.push(new Connection(fromStation,toStation,group,false));
+                this.connections.push(new Connection(fromStation,toStation,group,line,false));
         })
 
         this.connections.sort((c1,c2) => c1.group.id - c2.group.id)
@@ -564,6 +629,7 @@ class Connection {
     fromStation: Station;
     toStation: Station;
     group: Group;
+    line: Line;
     show: boolean = true;
     twoWay: boolean;
 
@@ -571,11 +637,13 @@ class Connection {
         fromStation: Station,
         toStation: Station,
         group: Group,
+        line: Line,
         twoWay: boolean
     ) {
         this.fromStation = fromStation;
         this.toStation = toStation;
         this.group = group;
+        this.line = line;
         this.twoWay = twoWay;
     }
 }
@@ -585,6 +653,7 @@ class Group {
     name: string;
     color: string;
     show: boolean = true;
+    lines: Array<Line> = [];
 
     constructor(
         id: number,
@@ -594,6 +663,19 @@ class Group {
         this.id = id;
         this.name = name;
         this.color = color;
+    }
+}
+
+class Line {
+    id: number;
+    group: Group;
+
+    constructor(
+        id: number,
+        group: Group
+    ) {
+        this.id = id;
+        this.group = group;
     }
 }
 
@@ -609,7 +691,23 @@ interface IConnection {
     to_station_label: string,
     group_id: number,
     group_name: string,
+    line_id: number,
     colour: string
+}
+
+interface IRouteConnection {
+    current_station: IRouteStation,
+    next_station: IRouteStation,
+    current_line: IRouteLine
+}
+
+interface IRouteStation {
+    label: string
+}
+
+interface IRouteLine {
+    id: number,
+    name: string
 }
 
 class View {

@@ -166,9 +166,10 @@ class RailwayMapRenderer {
         ctx.fillRect(0,0,canvas.width,canvas.height);
     }
 
-    private drawStations() {
+    private drawStations(route:boolean = false) {
         this.stations.forEach(s => {
-            this.drawStation(s)
+            if(route&&this.routeStations.includes(s)) this.drawStation(s)
+            else if (!route&&!this.routeStations.includes(s)) this.drawStation(s)
         })
     }
 
@@ -194,24 +195,28 @@ class RailwayMapRenderer {
             y: y
         })};
     
-        if (this.routeStations.length > 0 && !this.routeStations.includes(station)) return;
+
+        const dim = (this.routeStations.length > 0 && !this.routeStations.includes(station));
+
+        const white = dim ?
+        "#222" : "#ffffff";
 
         if (groups.length > 0) {
-            this.drawText(x,y+(20/view.scale),this.config.fontSize,name,"#ffffff","center",true)
+            if (!dim) this.drawText(x,y+(20/view.scale),this.config.fontSize,name,white,"center",true)
     
-            if (groups.length > 1) this.drawLine(x,y,x+stationGroupsOffset/view.scale*(groups.length-1),y-stationGroupsOffset/view.scale*(groups.length-1),"#fff",15,true);
+            if (groups.length > 1) this.drawLine(x,y,x+stationGroupsOffset/view.scale*(groups.length-1),y-stationGroupsOffset/view.scale*(groups.length-1),white,15,true);
     
             groups.forEach(g=>{
                 
-                this.drawCircle(x,y,8,`#${g.color}`,"#ffffff",2,true,true,stationClicked);
+                this.drawCircle(x,y,8,dim ? white : `#${g.color}`,white,2,true,true,stationClicked);
     
                 x += stationGroupsOffset / view.scale;
                 y -= stationGroupsOffset / view.scale;
             })
         } else if (this.config.showStationsWithNoConnections) {
-            this.drawText(x,y+(20/view.scale),this.config.fontSize,name,"#ffffff","center",true);
+            if (!dim) this.drawText(x,y+(20/view.scale),this.config.fontSize,name,white,"center",true);
     
-            this.drawCircle(x,y,8,`#fff`,"#ffffff",2,true,true,stationClicked);
+            this.drawCircle(x,y,8,white,white,2,true,true,stationClicked);
         }
     }
 
@@ -301,7 +306,7 @@ class RailwayMapRenderer {
         x2 += offsetTo ;
         y2 -= offsetTo ;
 
-        ctx.strokeStyle = dim ? `#${color}11` :`#${color}`;
+        ctx.strokeStyle = dim ? `#222` :`#${color}`;
         
         const clickConnection = () => {this.onConnectionClicked({
             from_name: from.name,
@@ -424,8 +429,12 @@ class RailwayMapRenderer {
 
         this.canvasClickables = [];
 
+        const isRoute = this.route.length > 0;
+
+        if (isRoute) this.drawStations(false)
         this.drawConnections();
-        this.drawStations();
+        if (isRoute) this.drawStations(true);
+        else this.drawStations();
 
         this.canvasClickables.reverse();
 
@@ -464,6 +473,15 @@ class RailwayMapRenderer {
                 if (!this.routeStations.includes(fromStation)) this.routeStations.push(fromStation);
                 if (!this.routeStations.includes(toStation)) this.routeStations.push(toStation);
             }  
+
+        })
+
+        this.stations.sort((s1, s2) => {
+            const dim1 = this.routeStations.includes(s1) ? 1 : 0
+            const dim2 = this.routeStations.includes(s2) ? 1 : 0
+
+            return dim1 - dim2;
+
 
         })
     }

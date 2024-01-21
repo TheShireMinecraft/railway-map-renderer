@@ -448,6 +448,8 @@ class RailwayMapRenderer {
         this.route = [];
         this.routeStations = [];
 
+        if (routeData)
+
         routeData.forEach(rc => {
             const connection = this.connections.filter(c=>{
                 return ((c.fromStation.label == rc.current_station.label && c.toStation.label == rc.next_station.label) ||

@@ -504,7 +504,7 @@ class RailwayMapRenderer {
             const y = sd.z_position;
 
             // Don't load station if position data doesn't exist
-            if (x && y)
+            if ((x !== undefined) && (y !== undefined))
 
             this.stations.push(new Station(label,name,x,y))
         });

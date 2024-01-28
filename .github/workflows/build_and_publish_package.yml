@@ -7,5 +7,5 @@ jobs:
     name: Build and Publish
     runs-on: self-hosted
     steps:
-      - use: actions/checkout@v4
+      - uses: actions/checkout@v4
       - run: tsc --module commonjs

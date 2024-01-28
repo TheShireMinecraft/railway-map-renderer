@@ -1,4 +1,4 @@
-class RailwayMapRenderer {
+export class RailwayMapRenderer {
     private stations:      Array<Station>    = [];
     private connections:   Array<Connection> = [];
     private groups:        Array<Group>      = [];
@@ -744,7 +744,7 @@ class MouseState {
     touchDist: number = NaN;
 }
 
-class RailwayMapRendererConfig {
+export class RailwayMapRendererConfig {
     bgStyle: string = "#111";
     fontSize: number = 10;
     fontStyle: string = "#fff";

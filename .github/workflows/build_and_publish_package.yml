@@ -1,0 +1,11 @@
+on:
+  push:
+    branches:
+    - main
+jobs:
+  build_and_publish:
+    name: Build and Publish
+    runs-on: self-hosted
+    steps:
+      - use: actions/checkout@v4
+      - run: tsc --module commonjs

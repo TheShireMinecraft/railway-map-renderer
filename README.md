@@ -17,7 +17,7 @@ renderer.draw(); // The renderer will redraw automatically whenever the camera i
 ```
 
 ## Config
-The library provides a `RailwayMapRendererConfig` class for configuring a `RailwayMapRenderer`, it can be passed as an argument in the constructor or with the `setConfig()` method.
+The library provides a `RailwayMapRendererConfig` class for configuring a `RailwayMapRenderer`, it can be passed as an argument in the constructor or applied using the `setConfig()` method.
 
 ```js
 class RailwayMapRendererConfig {

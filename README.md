@@ -26,6 +26,7 @@ class RailwayMapRendererConfig {
     fontStyle: string = "#fff";       // The font style 
     font: string      = "sans-serif"; // The font family 
 
+    centerRouteMargin: number   = 50;    // Margin in pixels used for placing stations near the edge when centering the view on a railway route
     lineWidth: number           = 8;     // Line width for drawing connections
     stationGroupsOffset: number = 12;    // Offset on the x and y axes for each line connection to a station
     renderDebug: boolean        = false; // Render debug boxes around clickable areas

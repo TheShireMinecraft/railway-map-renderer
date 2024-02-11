@@ -15,7 +15,7 @@ export class RailwayMapRenderer {
 
     private clickStart = {x: 0, y: 0};
 
-    private canvasClickables: Array<CanvasClickable> = new Array;
+    private canvasClickables: Array<CanvasClickable> = [];
 
     constructor(
         canvas: HTMLCanvasElement,
@@ -453,7 +453,7 @@ export class RailwayMapRenderer {
      * Set route for journey planner display, from the api
      * @param routeData - Array of route nodes
      */
-    public setRoute(routeData: Array<IRouteConnection>) {
+    public setRoute(routeData: Array<IRouteConnection>, center: boolean = true) {
         this.route = [];
         this.routeStations = [];
 
@@ -484,6 +484,56 @@ export class RailwayMapRenderer {
 
 
         })
+
+        if (center) this.centerViewOnRoute();
+    }
+
+    public centerViewOnRoute() {
+        const margin = this.config.centerRouteMargin;
+        const routeStations = this.routeStations;
+
+        if (routeStations.length == 0) return;
+
+        if (routeStations.length < 2) {
+            this.view.x = routeStations[0].x;
+            this.view.y = routeStations[0].y;
+
+            this.view.scale = 10;
+            return;
+        }
+
+        routeStations.sort((s1, s2) => s1.x - s2.x)
+
+        const minX = routeStations[0].x;
+        const maxX = routeStations[routeStations.length-1].x;
+
+        routeStations.sort((s1, s2) => s1.y - s2.y)
+
+        const minY = routeStations[0].y;
+        const maxY = routeStations[routeStations.length-1].y;
+
+        const cx = ( minX + maxX ) / 2
+        const cy = ( minY + maxY ) / 2
+
+        this.view.x = cx 
+        this.view.y = cy
+
+        if ((this.canvas.width - margin * 2)/(this.canvas.height - margin * 2) < (maxX-minX)/(maxY-minY)) {
+            this.view.scale = ((this.canvas.width - margin) - (this.canvas.width/2)) / (maxX-this.view.x);
+        }
+        else {
+            this.view.scale = ((this.canvas.height - margin) - (this.canvas.height/2)) / (maxY-this.view.y);
+        }
+        
+        /*
+
+
+        (this.canvas.width - margin) = (maxX-this.view.x) * this.view.scale + (this.canvas.width/2);
+        
+        
+        */
+        //this.view.scale = ((this.canvas.width - margin) - (this.canvas.width/2)) / (maxX-this.view.x);
+        this.draw();
     }
 
     /**
@@ -750,6 +800,7 @@ export class RailwayMapRendererConfig {
     fontStyle: string = "#fff";
     font: string = "sans-serif";
 
+    centerRouteMargin: number = 50;
     lineWidth: number = 8;
     stationGroupsOffset: number = 12;
     renderDebug: boolean = false;

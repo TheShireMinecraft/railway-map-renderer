@@ -24,19 +24,15 @@
 
 			const stationsData    = (await axios.get("https://shirecraft.us/api/railway/stations"   )).data.data;
 			const connectionsData = (await axios.get("https://shirecraft.us/api/railway/connections")).data.data;
-			const journeyData     = (await axios.get("https://shirecraft.us/api/railway/route?start=KMG&end=LAC&weighting=time")).data.data.components;
-
-			console.log(journeyData);
 
 			railwayMapRenderer.setData(stationsData,connectionsData);
 
-			railwayMapRenderer.setRoute(journeyData);
-
-			resizeCanvas()
+			resizeCanvas();
 
 			function resizeCanvas() {
 				railwayCanvas.width = window.innerWidth;
 				railwayCanvas.height = window.innerHeight;
+
 
 				railwayMapRenderer.draw();
 			}
@@ -49,7 +45,9 @@
 				console.log(`Clicked connection: ${ev.group.name}; ${ev.from_label} ${ev.twoWay ? '<->' : '->'} ${ev.to_label}.`)
 			}
 
-			railwayMapRenderer.onStationClicked = (ev) => {
+			let clickedStations = [];
+
+			railwayMapRenderer.onStationClicked = async (ev) => {
 				let groupNames = [];
 
 				ev.groups.forEach(g => {
@@ -59,6 +57,24 @@
 				const groupsString = groupNames.length > 0 ? `(${groupNames.join(', ')})` : "(No connections!)";
 
 				console.log(`Clicked station: ${ev.name} ${groupsString}`);
+
+				if (clickedStations.length == 1) {
+					clickedStations.push(ev.label)
+
+					await setRoute(clickedStations[0],clickedStations[1])
+
+					clickedStations = []
+				} else {
+					clickedStations.push(ev.label)
+				}
+			}
+
+			async function setRoute(l1, l2) {
+				const journeyData = (await axios.get(`https://shirecraft.us/api/railway/route?start=${l1}&end=${l2}&weighting=time`)).data.data.components;
+				
+				if (!journeyData) return;
+
+				railwayMapRenderer.setRoute(journeyData);
 			}
 		</script>
 	</body>
